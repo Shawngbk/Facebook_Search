@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html ng-app="myApp">
+<head>
+    <title>FB Search</title>
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0, shrink-to-fit=no">
+    <!--
+    <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css"
+          integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    -->
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+    <script src="https://cdn.bootcss.com/angular.js/1.6.3/angular.min.js"></script>
+    <script src="https://angular-ui.github.io/bootstrap/ui-bootstrap-tpls-2.2.0.js"></script>
+
+    <link href="/try/bootstrap/twitter-bootstrap-v2/docs/assets/css/bootstrap.css" rel="stylesheet">
+    <script src="/try/bootstrap/twitter-bootstrap-v2/js/bootstrap-tooltip.js"></script>
+    <script src="/try/bootstrap/twitter-bootstrap-v2/js/bootstrap-popover.js"></script>
+
+
+    <script src="hw8.js"></script>
+    <link href="hw8.css" rel="stylesheet">
+    <style type="text/css">
+
+
+    </style>
+</head>
+
+<body ng-controller="MyController">
+<!--
+<script>
+    loadFB(facebookInit); // load FB scripts, then call facebookInit
+
+    function facebookInit() {
+        buttonFB.disabled = false; // ready to connect with FB
+        buttonFB.onclick = function(){
+            // sometimes FB is still not available after facebookInit is called, it's safer to call it just in time
+            FB.init({ appId: '1207432259353304', cookie: true, xfbml: true, oauth: true });
+            // FB.api( or FB.login( ..
+        }
+    }
+
+    function loadFB(cb) { // loads FB script asynchronously
+        var script = document.createElement('script');
+        script.async = true;
+        script.src = '//connect.facebook.net/en_US/all.js';
+        script.onload = cb;
+        document.head.appendChild(script);
+    }
+
+</script>
+-->
+<div id="fb-root"></div>
+<script>
+    window.fbAsyncInit = function() {
+        FB.init({
+            appId      : '1207432259353304',
+            xfbml      : true,
+            status     : true,
+            version    : 'v2.5'
+        });
+    };
+
+    (function(d, s, id){
+        var js, fjs = d.getElementsByTagName(s)[0];
+        if (d.getElementById(id)) {return;}
+        js = d.createElement(s); js.id = id;
+        js.src = "//connect.facebook.net/en_US/sdk.js";
+        fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));
+</script>
+
+<script>
+    $(window).load(function() {
+        var comment_callback = function(response) {
+            console.log("comment_callback");
+            console.log(response);
+        }
+        FB.Event.subscribe('comment.create', comment_callback);
+        FB.Event.subscribe('comment.remove', comment_callback);
+    });
+</script>
+<div class="container-fluid">
+    <div class="search-container">
+        <div class="row">
+            <div class="col-sm-3 col-xs-12">
+                <h1 class="title">FB Search</h1>
+            </div>
+            <div class="col-sm-6 col-xs-9">
+                <div class="input-group input-group-lg search-input-group">
+                    <input id="input_kw" type="text" class="form-control" placeholder="type something..." ng-model="keyword" data-toggle="tooltip" data-placement="bottom" title="Please type a keyword">
+                      <span class="input-group-btn">
+                        <button class="btn btn-primary" type="button" ng-click="kwFunc(atDetail)" onclick=""><span class="glyphicon glyphicon-search"></span></button>
+                      </span>
+                </div>
+            </div>
+            <div class="col-sm-3 col-xs-3">
+                <button class="btn btn-default btn-lg clear-btn" ng-click="resetForm(atDetail)" type="reset">Clear</button>
+            </div>
+        </div>
+    </div>
+    <div id="carousel-legislator2detail" class="carousel slide" data-ride="carousel" data-interval="0"
+         data-keyboard="false">
+        <div class="carousel-inner" role="listbox">
+            <!-- -----------------------------------------------------  carousel1--------------------------------------------------------------------------------------------      -->
+            <div class="item active">
+                <div class="nav-container tab-content current">
+                    <ul class="nav nav-tabs nav-justified tab-pane in active">
+                        <li role="presentation" class="active"><a data-toggle="tab" href="#users">Users</a></li>
+                        <li role="presentation"><a data-toggle="tab" href="#pages">Pages</a></li>
+                        <li role="presentation"><a data-toggle="tab" href="#events">Events</a></li>
+                        <li role="presentation"><a data-toggle="tab" href="#places">Places</a></li>
+                        <li role="presentation"><a data-toggle="tab" href="#groups">Groups</a></li>
+                        <li role="presentation"><a data-toggle="tab" href="#favorites">Favorites</a></li>
+                    </ul>
+                </div>
+                <div id = "main_progress_bar" class="progress_bar progress progress-striped active" style="display:none">
+                    <div class="progress-bar progress-bar-info" role="progressbar"
+                         aria-valuenow="60" aria-valuemin="0" aria-valuemax="100"
+                         style="width: 60%;">
+                        <span class="sr-only">40% 完成</span>
+                    </div>
+                </div>
+                <!-- -------------------users-------------------- -->
+                <div class="tab-content" id="main_page_info" style="display: none">
+                    <div id="users" class="tab-pane fade in active">
+                        <div id="users-show" style="display: none">
+                            <table class="table table-hover">
+                                <thead id="title_head" style="">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Profile photo</th>
+                                    <th>Name</th>
+                                    <th>Favorite</th>
+                                    <th>Details</th>
+                                </tr>
+                                </thead>
+                                <tbody id="users_table">
+                                <!--<tr dir-paginate="users in userJson | filter:selectedState |  orderBy:'last_name'| orderBy:'state_name' | itemsPerPage: 10" pagination-id="legState_pg">-->
+                                <tr ng-repeat="users in userJson">
+                                    <td>{{ $index + 1 }}</td>
+                                    <td><img src="{{users.picture.data.url}}" class="img-responsive img-circle" height="30" width="40"></td>
+                                    <td>{{users.name}}</td>
+                                    <td>
+                                        <button class="btn btn-default" ng-click="favoriteSave(users,'Users'); getFavInfo()" >
+                                            <span ng-style="checkLight(users.id)" class="glyphicon glyphicon-star-empty"></span>
+                                        </button>
+                                    </td>
+                                    <td>
+                                        <a href="#carousel-legislator2detail" role="button" data-slide="next">
+                                            <button class="btn btn-default" ng-click="viewDetail(users)" ><span class="glyphicon glyphicon-chevron-right"></span></button>
+                                        </a>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div id="userpagebutton">
+                            <button id="usernext" type="button" class="btn btn-default" style="display: none" ng-click="user_nextPage()">next</button>
+                            <button id="userprevious" type="button" class="btn btn-default" style="display: none" ng-click="user_prePage()">previous</button>
+                        </div>
+                    </div>
+                    <!-- -------------------pages-------------------- -->
+                    <div id="pages" class="tab-pane fade">
+                        <div id="pages-show" style="display: none">
+                            <table id="pages_table" class="table table-hover">
+                                <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Profile photo</th>
+                                    <th>Name</th>
+                                    <th>Favorite</th>
+                                    <th>Details</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr ng-repeat="pages in pageJson">
+                                    <td>{{ $index + 1 }}</td>
+                                    <td><img src="{{pages.picture.data.url}}" class="img-responsive img-circle" height="30" width="40"></td>
+                                    <td>{{pages.name}}</td>
+
+                                    <td>
+                                        <button class="btn btn-default" ng-click="favoriteSave(pages,'Pages'); getFavInfo()">
+                                            <span ng-style="checkLight(pages.id)" class="glyphicon glyphicon-star-empty"></span>
+                                        </button>
+                                    </td>
+                                    <td>
+                                        <a href="#carousel-legislator2detail" role="button" data-slide="next">
+                                            <button class="btn btn-default" ng-click="viewDetail(pages)"><span class="glyphicon glyphicon-chevron-right"></span></button>
+                                        </a>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div id="pagepagebutton">
+                            <button id="pagenext" type="button" class="btn btn-default" style="display: none" ng-click="page_nextPage()">next</button>
+                            <button id="pageprevious" type="button" class="btn btn-default" style="display: none" ng-click="page_prePage()">previous</button>
+                        </div>
+                    </div>
+                    <!-- -------------------events-------------------- -->
+                    <div id="events" class="tab-pane fade">
+                        <div id="events-show" style="display: none">
+                            <table id="events_table" class="table table-hover">
+                                <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Profile photo</th>
+                                    <th>Name</th>
+                                    <th>Favorite</th>
+                                    <th>Details</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr ng-repeat="events in eventJson">
+                                    <td>{{ $index + 1 }}</td>
+                                    <td><img src="{{events.picture.data.url}}" class="img-responsive img-circle" height="30" width="40"></td>
+                                    <td>{{events.name}}</td>
+
+                                    <td>
+                                        <button class="btn btn-default" ng-click="favoriteSave(events,'Events'); getFavInfo()">
+                                            <span ng-style="checkLight(events.id)" class="glyphicon glyphicon-star-empty"></span>
+                                        </button>
+                                    </td>
+                                    <td>
+                                        <a href="#carousel-legislator2detail" role="button" data-slide="next">
+                                            <button class="btn btn-default" ng-click="viewDetail(events)"><span class="glyphicon glyphicon-chevron-right"></span></button>
+                                        </a>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div id="eventpagebutton">
+                            <button id="eventnext" type="button" class="btn btn-default" style="display: none" ng-click="event_nextPage()">next</button>
+                            <button id="eventprevious" type="button" class="btn btn-default" style="display: none" ng-click="event_prePage()">previous</button>
+                        </div>
+                    </div>
+                    <!-- -------------------places-------------------- -->
+                    <div id="places" class="tab-pane fade">
+                        <div id="places-show" style="display: none">
+                            <table id="places_table" class="table table-hover">
+                                <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Profile photo</th>
+                                    <th>Name</th>
+                                    <th>Favorite</th>
+                                    <th>Details</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr ng-repeat="places in placeJson">
+                                    <td>{{ $index + 1 }}</td>
+                                    <td><img src="{{places.picture.data.url}}" class="img-responsive img-circle" height="30" width="40"></td>
+                                    <td>{{places.name}}</td>
+
+                                    <td>
+                                        <button class="btn btn-default" ng-click="favoriteSave(places,'Places'); getFavInfo()">
+                                            <span ng-style="checkLight(places.id)" class="glyphicon glyphicon-star-empty"></span>
+                                        </button>
+                                    </td>
+                                    <td>
+                                        <a href="#carousel-legislator2detail" role="button" data-slide="next">
+                                            <button class="btn btn-default" ng-click="viewDetail(places)"><span class="glyphicon glyphicon-chevron-right"></span></button>
+                                        </a>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div id="placepagebutton">
+                            <button id="placenext" type="button" class="btn btn-default" style="display: none" ng-click="place_nextPage()">next</button>
+                            <button id="placeprevious" type="button" class="btn btn-default" style="display: none" ng-click="place_prePage()">previous</button>
+                        </div>
+                    </div>
+                    <!-- -------------------groups-------------------- -->
+                    <div id="groups" class="tab-pane fade">
+                        <div id="groups-show" style="display: none">
+                            <table id="groups_table" class="table table-hover">
+                                <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Profile photo</th>
+                                    <th>Name</th>
+                                    <th>Favorite</th>
+                                    <th>Details</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr ng-repeat="groups in groupJson">
+                                    <td>{{ $index + 1 }}</td>
+                                    <td><img src="{{groups.picture.data.url}}" class="img-responsive img-circle" height="30" width="40"></td>
+                                    <td>{{groups.name}}</td>
+
+                                    <td>
+                                        <button class="btn btn-default" ng-click="favoriteSave(groups,'Groups'); getFavInfo()">
+                                            <span ng-style="checkLight(groups.id)" class="glyphicon glyphicon-star-empty"></span>
+                                        </button>
+                                    </td>
+                                    <td>
+                                        <a href="#carousel-legislator2detail" role="button" data-slide="next">
+                                            <button class="btn btn-default" ng-click="viewDetail(groups)"><span class="glyphicon glyphicon-chevron-right"></span></button>
+                                        </a>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div id="grouppagebutton">
+                            <button id="groupnext" type="button" class="btn btn-default" style="display: none" ng-click="group_nextPage()">next</button>
+                            <button id="groupprevious" type="button" class="btn btn-default" style="display: none" ng-click="group_prePage()">previous</button>
+                        </div>
+                    </div>
+
+                    <!-- -------------------favorite-------------------- -->
+                    <div id="favorites" class="tab-pane fade" >
+                        <div id="favorites-show" style="display: none">
+                            <table class="table table-hover">
+                                <thead id="" style="">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Profile photo</th>
+                                    <th>Name</th>
+                                    <th>Type</th>
+                                    <th>Favorite</th>
+                                    <th>Details</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+
+                                <tr ng-repeat="favInfo in favoriteInfo">
+                                    <td>{{ $index + 1 }}</td>
+                                    <td><img src="{{favInfo.photo_profile}}" class="img-responsive img-circle" height="30" width="40"></td>
+                                    <td>{{favInfo.name}}</td>
+                                    <td>{{favInfo.type}}</td>
+                                    <td>
+                                        <button class="btn btn-default" ng-click="removeFav(favInfo)"><span class="glyphicon glyphicon-trash"></span></button>
+                                    </td>
+                                    <td>
+                                        <a href="#carousel-legislator2detail" role="button" data-slide="next">
+                                            <button class="btn btn-default" ng-click="viewDetail(favInfo)"><span class="glyphicon glyphicon-chevron-right"></span></button>
+                                        </a>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- -----------------------------------------------------  carousel2--------------------------------------------------------------------------------------------      -->
+            <div class="item">
+                <div id="detail_info">
+                    <div id="detail_title" class="row">
+                        <div id="back_button">
+                            <a href="#carousel-legislator2detail" role="button" data-slide="prev" id="go_back" ng-click="resetAtDetail()">
+                                <button class="btn btn-default" type="reset"><span class = "glyphicon glyphicon-chevron-left">Back</span></button>
+                            </a>
+                        </div>
+
+                        <div id="fav_button">
+                            <button class="btn btn-default" ng-click="favoriteSave(json_for_detail_star,type); getFavInfo()">
+                                <span ng-style="checkLight(id_for_detail_star)" class="glyphicon glyphicon-star-empty"></span>
+                            </button>
+                        </div>
+                        <div id="fb_button">
+                            <button class="btn btn-default" ng-click="pop_up(detailJson.picture.data.url, detailJson.name)">
+                                <span><img style="display: block; width: 20px; height: 20px; " src="http://cs-server.usc.edu:45678/hw/hw8/images/facebook.png"></span>
+                            </button>
+                        </div>
+                    </div>
+                    <!--
+                    <div id="main_albums" >
+                        <div class="well well-sm">
+                            <span style="font-weight:bold;">Albums</span>
+                        </div>
+                        <div id="photo">
+
+                        </div>
+                    </div>
+                    -->
+                    <!-- -----------------------------------------------------  Album------------------------------------------------      -->
+                    <div class="row" id="album_post_row">
+                        <div class="col-sm-6 col-xs-12">
+                            <div id = "album_progress_bar" class="panel panel-default" style="display:none">
+                                <div class="panel-heading">
+                                    <h3 class="panel-title">
+                                        Albums
+                                    </h3>
+                                </div>
+                                <div class="panel-body">
+                                    <div class="progress_bar progress progress-striped active" >
+                                        <div class="progress-bar progress-bar-info" role="progressbar"
+                                             aria-valuenow="60" aria-valuemin="0" aria-valuemax="100"
+                                             style="width: 60%;">
+                                            <span class="sr-only">40% 完成</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-xs-12 col-md-6 col-lg-6" >
+                            <div id="main_albums" class="panel panel-default" >
+                                <div class="panel-heading">
+                                    <h3 class="panel-title">
+                                        Albums
+                                    </h3>
+                                </div>
+
+                                <div class="panel-body">
+                                    <div class="panel-group" id="accordion">
+
+                                    <!--album1-->
+                                    <div class="panel panel-default" id="album1">
+                                        <div class="panel-heading">
+                                            <h4 class="panel-title">
+                                                <a data-toggle="collapse" data-parent="#accordion" href="#collapse1">{{detailJson.albums.data[0].name}}</a>
+                                            </h4>
+
+                                        </div>
+                                        <div id="collapse1" class="panel-collapse collapse in">
+                                            <div class="panel-body" >
+                                                <img class="center-block" src="https://graph.facebook.com/v2.8/{{detailJson.albums.data[0].photos.data[0].id}}/picture?&access_token=EAAFydU6luHcBAJBdDKM0IXusysZA8ZAeaNjMYaGMCZBb9p3LoDTihW3H2pSzACGdYjiQDNXF9Cv3PKvU5ZCkVKoSJqKykgofoZBRCLIvzvh7IVopGqv7meRt1t6VvnQEUPRrCF63hpuPk2jMMJPZAE8dwrwWiL5FYZD" style="border-radius:8px;width: 90%; height: auto ">
+                                                <img class="center-block" src="https://graph.facebook.com/v2.8/{{detailJson.albums.data[0].photos.data[1].id}}/picture?&access_token=EAAFydU6luHcBAJBdDKM0IXusysZA8ZAeaNjMYaGMCZBb9p3LoDTihW3H2pSzACGdYjiQDNXF9Cv3PKvU5ZCkVKoSJqKykgofoZBRCLIvzvh7IVopGqv7meRt1t6VvnQEUPRrCF63hpuPk2jMMJPZAE8dwrwWiL5FYZD" style="margin-top:10px;border-radius:8px;width: 90%; height: auto">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!--album2-->
+                                    <div class="panel panel-default" id="album2">
+                                        <div class="panel-heading">
+                                            <h4 class="panel-title">
+                                                <a data-toggle="collapse" data-parent="#accordion" href="#collapse2">{{detailJson.albums.data[1].name}}</a>
+                                            </h4>
+
+                                        </div>
+
+                                        <div id="collapse2" class="panel-collapse collapse">
+                                            <div id="album2_pic" class="panel-body" >
+                                                <img class="center-block" src="https://graph.facebook.com/v2.8/{{detailJson.albums.data[1].photos.data[0].id}}/picture?&access_token=EAAFydU6luHcBAJBdDKM0IXusysZA8ZAeaNjMYaGMCZBb9p3LoDTihW3H2pSzACGdYjiQDNXF9Cv3PKvU5ZCkVKoSJqKykgofoZBRCLIvzvh7IVopGqv7meRt1t6VvnQEUPRrCF63hpuPk2jMMJPZAE8dwrwWiL5FYZD" style="border-radius:8px;width: 90%; height: auto ">
+                                                <img class="center-block" src="https://graph.facebook.com/v2.8/{{detailJson.albums.data[1].photos.data[1].id}}/picture?&access_token=EAAFydU6luHcBAJBdDKM0IXusysZA8ZAeaNjMYaGMCZBb9p3LoDTihW3H2pSzACGdYjiQDNXF9Cv3PKvU5ZCkVKoSJqKykgofoZBRCLIvzvh7IVopGqv7meRt1t6VvnQEUPRrCF63hpuPk2jMMJPZAE8dwrwWiL5FYZD" style="margin-top:10px;border-radius:8px;width: 90%; height: auto">
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+                                        <!--album3-->
+                                    <div class="panel panel-default" id="album3">
+                                        <div class="panel-heading">
+                                            <h4 class="panel-title">
+                                                <a data-toggle="collapse" data-parent="#accordion" href="#collapse3">{{detailJson.albums.data[2].name}}</a>
+                                            </h4>
+                                        </div>
+                                        <div id="collapse3" class="panel-collapse collapse">
+                                            <div id="album3_pic" class="panel-body" >
+                                                <img class="center-block" src="https://graph.facebook.com/v2.8/{{detailJson.albums.data[2].photos.data[0].id}}/picture?&access_token=EAAFydU6luHcBAJBdDKM0IXusysZA8ZAeaNjMYaGMCZBb9p3LoDTihW3H2pSzACGdYjiQDNXF9Cv3PKvU5ZCkVKoSJqKykgofoZBRCLIvzvh7IVopGqv7meRt1t6VvnQEUPRrCF63hpuPk2jMMJPZAE8dwrwWiL5FYZD" style="border-radius:8px;width: 90%; height: auto ">
+                                                <img class="center-block" src="https://graph.facebook.com/v2.8/{{detailJson.albums.data[2].photos.data[1].id}}/picture?&access_token=EAAFydU6luHcBAJBdDKM0IXusysZA8ZAeaNjMYaGMCZBb9p3LoDTihW3H2pSzACGdYjiQDNXF9Cv3PKvU5ZCkVKoSJqKykgofoZBRCLIvzvh7IVopGqv7meRt1t6VvnQEUPRrCF63hpuPk2jMMJPZAE8dwrwWiL5FYZD" style="margin-top:10px;border-radius:8px;width: 90%; height: auto">
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+                                        <!--album4-->
+                                    <div class="panel panel-default" id="album4">
+                                        <div class="panel-heading">
+                                            <h4 class="panel-title">
+                                                <a data-toggle="collapse" data-parent="#accordion" href="#collapse4">{{detailJson.albums.data[3].name}}</a>
+                                            </h4>
+                                        </div>
+                                        <div id="collapse4" class="panel-collapse collapse">
+                                            <div id="album4_pic" class="panel-body" >
+                                                <img class="center-block" src="https://graph.facebook.com/v2.8/{{detailJson.albums.data[3].photos.data[0].id}}/picture?&access_token=EAAFydU6luHcBAJBdDKM0IXusysZA8ZAeaNjMYaGMCZBb9p3LoDTihW3H2pSzACGdYjiQDNXF9Cv3PKvU5ZCkVKoSJqKykgofoZBRCLIvzvh7IVopGqv7meRt1t6VvnQEUPRrCF63hpuPk2jMMJPZAE8dwrwWiL5FYZD" style="border-radius:8px;width: 90%; height: auto ">
+                                                <img class="center-block" src="https://graph.facebook.com/v2.8/{{detailJson.albums.data[3].photos.data[1].id}}/picture?&access_token=EAAFydU6luHcBAJBdDKM0IXusysZA8ZAeaNjMYaGMCZBb9p3LoDTihW3H2pSzACGdYjiQDNXF9Cv3PKvU5ZCkVKoSJqKykgofoZBRCLIvzvh7IVopGqv7meRt1t6VvnQEUPRrCF63hpuPk2jMMJPZAE8dwrwWiL5FYZD" style="margin-top:10px;border-radius:8px;width: 90%; height: auto">
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+                                        <!--album5-->
+                                    <div class="panel panel-default" id="album5">
+                                        <div class="panel-heading">
+                                            <h4 class="panel-title">
+                                                <a data-toggle="collapse" data-parent="#accordion" href="#collapse5">{{detailJson.albums.data[4].name}}</a>
+                                            </h4>
+                                        </div>
+                                        <div id="collapse5" class="panel-collapse collapse">
+                                            <div id="album5_pic" class="panel-body">
+                                                <img class="center-block" src="https://graph.facebook.com/v2.8/{{detailJson.albums.data[4].photos.data[0].id}}/picture?&access_token=EAAFydU6luHcBAJBdDKM0IXusysZA8ZAeaNjMYaGMCZBb9p3LoDTihW3H2pSzACGdYjiQDNXF9Cv3PKvU5ZCkVKoSJqKykgofoZBRCLIvzvh7IVopGqv7meRt1t6VvnQEUPRrCF63hpuPk2jMMJPZAE8dwrwWiL5FYZD" style="border-radius:8px;width: 90%; height: auto ">
+                                                <img class="center-block" src="https://graph.facebook.com/v2.8/{{detailJson.albums.data[4].photos.data[1].id}}/picture?&access_token=EAAFydU6luHcBAJBdDKM0IXusysZA8ZAeaNjMYaGMCZBb9p3LoDTihW3H2pSzACGdYjiQDNXF9Cv3PKvU5ZCkVKoSJqKykgofoZBRCLIvzvh7IVopGqv7meRt1t6VvnQEUPRrCF63hpuPk2jMMJPZAE8dwrwWiL5FYZD" style="margin-top:10px;border-radius:8px;width: 90%; height: auto">
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+                                    </div>
+
+
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-6 col-xs-12">
+                            <div id="no_main_albums" class="panel panel-default" style="display: none">
+                            <div class="panel-heading">
+                                <h3 class="panel-title">
+                                    Albums
+                                </h3>
+                            </div>
+                            <div class="panel-body">
+                                <div class="panel panel-default">
+                                    <div class="panel-body no_response">
+                                        <span style="color: #ae9e82">No data found</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        </div>
+
+                        <!-- -----------------------------------------------------  Post------------------------------------------------      -->
+                        <div class="col-sm-6 col-xs-12">
+                            <div id = "post_progress_bar" class="panel panel-default" style="display:none">
+                            <div class="panel-heading">
+                                <h3 class="panel-title">
+                                    Posts
+                                </h3>
+                            </div>
+                            <div class="panel-body">
+                                <div class="progress_bar progress progress-striped active" >
+                                    <div class="progress-bar progress-bar-info" role="progressbar"
+                                         aria-valuenow="60" aria-valuemin="0" aria-valuemax="100"
+                                         style="width: 60%;">
+                                        <span class="sr-only">40% 完成</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        </div>
+
+                        <div class="col-sm-6 col-xs-12 col-md-6 col-lg-6" >
+                            <div id="main_posts" class="panel panel-default" >
+                            <div class="panel-heading">
+                                <h3 class="panel-title">
+                                    Posts
+                                </h3>
+                            </div>
+                            <div class="panel-body">
+                                <!--posts1-->
+                                <div class="panel panel-default" id="post1" >
+                                    <div class="panel-body">
+                                        <div class="row">
+                                            <div class="col-sm-1 col-xs-3">
+                                                <img src="{{detailJson.picture.data.url}}" width="50px" height="50px">
+                                            </div>
+                                            <div class="col-sm-11 col-xs-9">
+                                                <div class="row col-sm-12 col-xs-12 posts_name">
+                                                    <span style="font-weight: bold">{{detailJson.name}}</span>
+                                                </div>
+                                                <div class="row col-sm-12 col-xs-12 posts_time">
+                                                    <span style="color: grey">{{timeArray[0]}}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row col-sm-12 col-xs-12 posts_msg">
+                                            {{detailJson.posts.data[0].message}}
+                                        </div>
+                                    </div>
+                                </div>
+                                    <!--posts2-->
+                                <div class="panel panel-default" id="post2">
+                                    <div class="panel-body">
+                                        <div class="row">
+                                            <div class="col-sm-1 col-xs-3">
+                                                <img src="{{detailJson.picture.data.url}}" width="50px" height="50px">
+                                            </div>
+                                            <div class="col-sm-11 col-xs-9">
+                                                <div class="row col-sm-12 col-xs-12 posts_name">
+                                                    <span style="font-weight: bold">{{detailJson.name}}</span>
+                                                </div>
+                                                <div class="row col-sm-12 col-xs-12 posts_time">
+                                                    <span style="color: grey">{{timeArray[1]}}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row col-sm-12 col-xs-12 posts_msg">
+                                            {{detailJson.posts.data[1].message}}
+                                        </div>
+                                    </div>
+                                </div>
+                                    <!--posts3-->
+                                <div class="panel panel-default" id="post3">
+                                    <div class="panel-body">
+                                        <div class="row">
+                                            <div class="col-sm-1 col-xs-3">
+                                                <img src="{{detailJson.picture.data.url}}" width="50px" height="50px">
+                                            </div>
+                                            <div class="col-sm-11 col-xs-9">
+                                                <div class="row col-sm-12 col-xs-12 posts_name">
+                                                    <span style="font-weight: bold">{{detailJson.name}}</span>
+                                                </div>
+                                                <div class="row col-sm-12 col-xs-12 posts_time">
+                                                    <span style="color: grey">{{timeArray[2]}}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row col-sm-12 col-xs-12 posts_msg">
+                                            {{detailJson.posts.data[2].message}}
+                                        </div>
+                                    </div>
+                                </div>
+                                    <!--posts4-->
+                                <div class="panel panel-default" id="post4">
+                                    <div class="panel-body">
+                                        <div class="row">
+                                            <div class="col-sm-1 col-xs-3">
+                                                <img src="{{detailJson.picture.data.url}}" width="50px" height="50px">
+                                            </div>
+                                            <div class="col-sm-11 col-xs-9">
+                                                <div class="row col-sm-12 posts_name">
+                                                    <span style="font-weight: bold">{{detailJson.name}}</span>
+                                                </div>
+                                                <div class="row col-sm-12 col-xs-12 posts_time">
+                                                    <span style="color: grey">{{timeArray[3]}}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row col-sm-12 col-xs-12 posts_msg">
+                                            {{detailJson.posts.data[3].message}}
+                                        </div>
+                                    </div>
+                                </div>
+                                    <!--posts5-->
+                                <div class="panel panel-default" id="post5">
+                                    <div class="panel-body">
+                                        <div class="row">
+                                            <div class="col-sm-1 col-xs-3">
+                                                <img src="{{detailJson.picture.data.url}}" width="50px" height="50px">
+                                            </div>
+                                            <div class="col-sm-11 col-xs-9">
+                                                <div class="row col-sm-12 col-xs-12 posts_name">
+                                                    <span style="font-weight: bold">{{detailJson.name}}</span>
+                                                </div>
+                                                <div class="row col-sm-12 col-xs-12 posts_time">
+                                                    <span style="color: grey">{{timeArray[4]}}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row col-sm-12 col-xs-12 posts_msg">
+                                            {{detailJson.posts.data[4].message}}
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-6 col-xs-12">
+                            <div id="no_main_posts" class="panel panel-default" style="display: none">
+                                <div class="panel-heading">
+                                    <h3 class="panel-title">
+                                        Posts
+                                    </h3>
+                                </div>
+                                <div class="panel-body">
+                                    <div class="panel panel-default">
+                                        <div class="panel-body no_response">
+                                            <span style="color: #ae9e82">No data found</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+
+
+
+<script type="text/javascript">
+    $('.content-nav a').click(function (e) {
+        e.preventDefault()
+        $(this).tab('show')
+    })
+</script>
+</body>
+</html>
+
+<!--
+    <div class="panel-body">
+                                    <!--album1--
+<div class="panel panel-default" id="album1">
+    <div class="panel-heading">
+        <button type="button" class="btn btn-link" style="color: black" onclick="showBody('album1')">{{detailJson.albums.data[0].name}}</button>
+    </div>
+    <div id="album1_pic" class="panel-body" style="display: block">
+        <img class="center-block" src="https://graph.facebook.com/v2.8/{{detailJson.albums.data[0].photos.data[0].id}}/picture?&access_token=EAAFydU6luHcBAJBdDKM0IXusysZA8ZAeaNjMYaGMCZBb9p3LoDTihW3H2pSzACGdYjiQDNXF9Cv3PKvU5ZCkVKoSJqKykgofoZBRCLIvzvh7IVopGqv7meRt1t6VvnQEUPRrCF63hpuPk2jMMJPZAE8dwrwWiL5FYZD" style="border-radius:8px;width: 90%; height: auto ">
+        <img class="center-block" src="https://graph.facebook.com/v2.8/{{detailJson.albums.data[0].photos.data[1].id}}/picture?&access_token=EAAFydU6luHcBAJBdDKM0IXusysZA8ZAeaNjMYaGMCZBb9p3LoDTihW3H2pSzACGdYjiQDNXF9Cv3PKvU5ZCkVKoSJqKykgofoZBRCLIvzvh7IVopGqv7meRt1t6VvnQEUPRrCF63hpuPk2jMMJPZAE8dwrwWiL5FYZD" style="margin-top:10px;border-radius:8px;width: 90%; height: auto">
+    </div>
+</div>
+
+<!--album2--
+<div class="panel panel-default" id="album2">
+    <div class="panel-heading">
+        <button type="button" class="btn btn-link" style="color: black" onclick="showBody('album2')">{{detailJson.albums.data[1].name}}</button>
+    </div>
+    <div id="album2_pic" class="panel-body" style="display: none">
+        <img class="center-block" src="https://graph.facebook.com/v2.8/{{detailJson.albums.data[1].photos.data[0].id}}/picture?&access_token=EAAFydU6luHcBAJBdDKM0IXusysZA8ZAeaNjMYaGMCZBb9p3LoDTihW3H2pSzACGdYjiQDNXF9Cv3PKvU5ZCkVKoSJqKykgofoZBRCLIvzvh7IVopGqv7meRt1t6VvnQEUPRrCF63hpuPk2jMMJPZAE8dwrwWiL5FYZD" style="border-radius:8px;width: 90%; height: auto">
+        <img class="center-block" src="https://graph.facebook.com/v2.8/{{detailJson.albums.data[1].photos.data[1].id}}/picture?&access_token=EAAFydU6luHcBAJBdDKM0IXusysZA8ZAeaNjMYaGMCZBb9p3LoDTihW3H2pSzACGdYjiQDNXF9Cv3PKvU5ZCkVKoSJqKykgofoZBRCLIvzvh7IVopGqv7meRt1t6VvnQEUPRrCF63hpuPk2jMMJPZAE8dwrwWiL5FYZD" style="margin-top:10px;border-radius:8px;width: 90%; height: auto">
+    </div>
+</div>
+
+<!--album3--
+<div class="panel panel-default" id="album3">
+    <div class="panel-heading">
+        <button type="button" class="btn btn-link" style="color: black" onclick="showBody('album3')">{{detailJson.albums.data[2].name}}</button>
+    </div>
+    <div id="album3_pic" class="panel-body" style="display: none">
+        <img class="center-block" src="https://graph.facebook.com/v2.8/{{detailJson.albums.data[2].photos.data[0].id}}/picture?&access_token=EAAFydU6luHcBAJBdDKM0IXusysZA8ZAeaNjMYaGMCZBb9p3LoDTihW3H2pSzACGdYjiQDNXF9Cv3PKvU5ZCkVKoSJqKykgofoZBRCLIvzvh7IVopGqv7meRt1t6VvnQEUPRrCF63hpuPk2jMMJPZAE8dwrwWiL5FYZD" style="border-radius:8px;width: 90%; height: auto">
+        <img class="center-block" src="https://graph.facebook.com/v2.8/{{detailJson.albums.data[2].photos.data[1].id}}/picture?&access_token=EAAFydU6luHcBAJBdDKM0IXusysZA8ZAeaNjMYaGMCZBb9p3LoDTihW3H2pSzACGdYjiQDNXF9Cv3PKvU5ZCkVKoSJqKykgofoZBRCLIvzvh7IVopGqv7meRt1t6VvnQEUPRrCF63hpuPk2jMMJPZAE8dwrwWiL5FYZD" style="margin-top:10px;border-radius:8px;width: 90%; height: auto">
+    </div>
+</div>
+
+<!--album4--
+<div class="panel panel-default" id="album4">
+    <div class="panel-heading">
+        <button type="button" class="btn btn-link" style="color: black" onclick="showBody('album4')">{{detailJson.albums.data[3].name}}</button>
+    </div>
+    <div id="album4_pic" class="panel-body" style="display: none">
+        <img class="center-block" src="https://graph.facebook.com/v2.8/{{detailJson.albums.data[3].photos.data[0].id}}/picture?&access_token=EAAFydU6luHcBAJBdDKM0IXusysZA8ZAeaNjMYaGMCZBb9p3LoDTihW3H2pSzACGdYjiQDNXF9Cv3PKvU5ZCkVKoSJqKykgofoZBRCLIvzvh7IVopGqv7meRt1t6VvnQEUPRrCF63hpuPk2jMMJPZAE8dwrwWiL5FYZD" style="border-radius:8px;width: 90%; height: auto">
+        <img class="center-block" src="https://graph.facebook.com/v2.8/{{detailJson.albums.data[3].photos.data[1].id}}/picture?&access_token=EAAFydU6luHcBAJBdDKM0IXusysZA8ZAeaNjMYaGMCZBb9p3LoDTihW3H2pSzACGdYjiQDNXF9Cv3PKvU5ZCkVKoSJqKykgofoZBRCLIvzvh7IVopGqv7meRt1t6VvnQEUPRrCF63hpuPk2jMMJPZAE8dwrwWiL5FYZD" style="margin-top:10px;border-radius:8px;width: 90%; height: auto">
+    </div>
+</div>
+
+<!--album5--
+<div class="panel panel-default" id="album5">
+    <div class="panel-heading">
+        <button type="button" class="btn btn-link" style="color: black" onclick="showBody('album5')">{{detailJson.albums.data[4].name}}</button>
+    </div>
+    <div id="album5_pic" class="panel-body" style="display: none">
+        <img class="center-block" src="https://graph.facebook.com/v2.8/{{detailJson.albums.data[4].photos.data[0].id}}/picture?&access_token=EAAFydU6luHcBAJBdDKM0IXusysZA8ZAeaNjMYaGMCZBb9p3LoDTihW3H2pSzACGdYjiQDNXF9Cv3PKvU5ZCkVKoSJqKykgofoZBRCLIvzvh7IVopGqv7meRt1t6VvnQEUPRrCF63hpuPk2jMMJPZAE8dwrwWiL5FYZD" style="border-radius:8px; width: 90%; height: auto">
+        <img class="center-block" src="https://graph.facebook.com/v2.8/{{detailJson.albums.data[4].photos.data[1].id}}/picture?&access_token=EAAFydU6luHcBAJBdDKM0IXusysZA8ZAeaNjMYaGMCZBb9p3LoDTihW3H2pSzACGdYjiQDNXF9Cv3PKvU5ZCkVKoSJqKykgofoZBRCLIvzvh7IVopGqv7meRt1t6VvnQEUPRrCF63hpuPk2jMMJPZAE8dwrwWiL5FYZD" style="margin-top:10px;border-radius:8px;width: 90%; height: auto">
+    </div>
+</div>
+</div>
+-->

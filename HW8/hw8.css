@@ -1,0 +1,167 @@
+.search-container {
+    min-height: 60px;
+    background-color: #f5f5f5;
+    margin-top: 20px;
+    border-bottom: #e3e3e3;
+}
+
+.title {
+    font-size: 20px;
+    padding-left: 14px;
+    color: rgb(61, 88, 154);
+}
+
+.input-group-lg > .input-group-btn > .btn {
+    padding: 10px 42px;
+}
+
+.search-input-group {
+    margin-top: 6px;
+}
+
+.clear-btn {
+    border-color: rgb(61, 88, 154);
+    color: rgb(61, 88, 154);
+    margin-top: 6px;
+}
+
+.nav-tabs.nav-justified > .active > a,
+.nav-tabs.nav-justified > .active > a:visited,
+.nav-tabs.nav-justified > .active > a:hover,
+.nav-tabs.nav-justified > .active > a:active {
+    border: none;
+    background-color: rgb(61, 88, 154);
+    color: #fff;
+}
+
+.nav-tabs.nav-justified > li > a {
+    border-bottom: 2px solid rgb(61, 88, 154);
+    color: #000;
+    cursor: pointer;
+}
+
+.tabd-content {
+    margin-top: 30px;
+}
+
+#userpagebutton {
+    text-align: center;
+}
+
+#pagepagebutton {
+    text-align: center;
+}
+
+#eventpagebutton {
+    text-align: center;
+}
+
+#placepagebutton {
+    text-align: center;
+}
+
+#grouppagebutton {
+    text-align: center;
+}
+
+#title_head {
+    width: 1410px;
+    height: 37px;
+    text-align: center;
+}
+
+
+#back_button {
+    float: left;
+
+}
+
+#fav_button {
+    float: right;
+
+}
+
+#fb_button {
+    float: right;
+    margin-right: 30px;
+}
+/*
+        main_albums {
+            width: 48%;
+            float: left;
+            margin-top: 30px;
+
+
+        }
+
+        album_progress_bar {
+            width: 48%;
+            float: left;
+            margin-top: 30px;
+        }
+
+        no_main_albums {
+            width: 48%;
+            float: left;
+            margin-top: 30px;
+
+        }
+
+        main_posts {
+            width: 48%;
+            float: right;
+            margin-top: 30px;
+
+        }
+
+        post_progress_bar {
+            width: 48%;
+            float: right;
+            margin-top: 30px;
+        }
+
+        no_main_posts {
+            width: 48%;
+            float: right;
+            margin-top: 30px;
+
+        }
+*/
+#detail_info {
+    padding: 25px;
+}
+
+.posts_name{
+    height: 25px;
+    line-height: 25px;
+    padding-left: 5%;
+}
+.posts_time {
+    height: 25px;
+    line-height: 25px;
+    padding-left: 5%;
+}
+.posts_msg {
+    padding-top: 25px;
+}
+
+.no_response {
+    background-color: #fcf8e5;
+}
+
+#main_progress_bar {
+    width: 60%;
+    margin-left: 18%;
+    margin-top: 18%;
+}
+#album_post_row {
+    margin-top: 30px;
+}
+
+.col-sm-6 {
+    min-height: 0;
+}
+
+#carousel-legislator2detail {
+    margin-top: 20px;
+}

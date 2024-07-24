@@ -1,0 +1,10 @@
+{
+	"name": "synapse-ws-sql--shawntestmpeworkspace",
+	"properties": {
+		"privateLinkResourceId": "/subscriptions/cf3cf956-64a6-4499-b7dc-136e9d68f7c9/resourceGroups/SynapseRG/providers/Microsoft.Synapse/workspaces/shawntestmpeworkspace",
+		"groupId": "sql",
+		"fqdns": [
+			"shawntestmpeworkspace.064fab6d-81ad-4cae-a2b4-4fc02c3e3c3a.sql.azuresynapse.net"
+		]
+	}
+}

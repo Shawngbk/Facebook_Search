@@ -1,0 +1,10 @@
+{
+	"name": "synapse-ws-custstgacct--shawntestmpeworkspace-synapseworkspaceblob",
+	"properties": {
+		"privateLinkResourceId": "/subscriptions/cf3cf956-64a6-4499-b7dc-136e9d68f7c9/resourceGroups/SynapseRG/providers/Microsoft.Storage/storageAccounts/synapseworkspaceblob",
+		"groupId": "dfs",
+		"fqdns": [
+			"synapseworkspaceblob.dfs.core.windows.net"
+		]
+	}
+}

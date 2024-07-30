@@ -1,0 +1,242 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"workspaceName": {
+			"type": "string",
+			"metadata": "Workspace name",
+			"defaultValue": "shawntestmpeworkspace"
+		},
+		"shawntestmpeworkspace-WorkspaceDefaultSqlServer_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'shawntestmpeworkspace-WorkspaceDefaultSqlServer'",
+			"defaultValue": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=tcp:shawntestmpeworkspace.sql.azuresynapse.net,1433;Initial Catalog=@{linkedService().DBName}"
+		},
+		"shawntestmpeworkspace-WorkspaceDefaultStorage_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://synapseworkspaceblob.dfs.core.windows.net"
+		}
+	},
+	"variables": {
+		"workspaceId": "[concat('Microsoft.Synapse/workspaces/', parameters('workspaceName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('workspaceName'), '/shawntestspark')]",
+			"type": "Microsoft.Synapse/workspaces/bigDataPools",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/shawntestmpeworkspace-WorkspaceDefaultSqlServer')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"parameters": {
+					"DBName": {
+						"type": "String"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlDW",
+				"typeProperties": {
+					"connectionString": "[parameters('shawntestmpeworkspace-WorkspaceDefaultSqlServer_connectionString')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/shawntestmpeworkspace-WorkspaceDefaultStorage')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('shawntestmpeworkspace-WorkspaceDefaultStorage_properties_typeProperties_url')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/AutoResolveIntegrationRuntime')]",
+			"type": "Microsoft.Synapse/workspaces/integrationRuntimes",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "Managed",
+				"typeProperties": {
+					"computeProperties": {
+						"location": "AutoResolve",
+						"dataFlowProperties": {
+							"computeType": "General",
+							"coreCount": 8,
+							"timeToLive": 0
+						}
+					}
+				},
+				"managedVirtualNetwork": {
+					"type": "ManagedVirtualNetworkReference",
+					"referenceName": "default"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/managedVirtualNetworks/default')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/WorkspaceSystemIdentity')]",
+			"type": "Microsoft.Synapse/workspaces/credentials",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "ManagedIdentity",
+				"typeProperties": {}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/default')]",
+			"type": "Microsoft.Synapse/workspaces/managedVirtualNetworks",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/shawntestspark')]",
+			"type": "Microsoft.Synapse/workspaces/bigDataPools",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"autoPause": {
+					"enabled": true,
+					"delayInMinutes": 15
+				},
+				"autoScale": {
+					"enabled": true,
+					"maxNodeCount": 3,
+					"minNodeCount": 3
+				},
+				"nodeCount": 10,
+				"nodeSize": "Small",
+				"nodeSizeFamily": "MemoryOptimized",
+				"sparkVersion": "3.4",
+				"isComputeIsolationEnabled": false,
+				"sessionLevelPackagesEnabled": false,
+				"customLibraries": [
+					{
+						"name": "kafka-sink-azure-kusto-4.0.6-jar-with-dependencies.jar",
+						"path": "shawntestmpeworkspace/libraries/kafka-sink-azure-kusto-4.0.6-jar-with-dependencies.jar",
+						"containerName": "prep",
+						"uploadedTimestamp": "0001-01-01T00:00:00+00:00",
+						"type": "jar"
+					}
+				],
+				"annotations": []
+			},
+			"dependsOn": [],
+			"location": "eastasia"
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/default/AzureBlobStorageTESTMPE3')]",
+			"type": "Microsoft.Synapse/workspaces/managedVirtualNetworks/managedPrivateEndpoints",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"privateLinkResourceId": "/subscriptions/cf3cf956-64a6-4499-b7dc-136e9d68f7c9/resourceGroups/SynapseRG/providers/Microsoft.Storage/storageAccounts/shawntestdwlogs",
+				"groupId": "blob"
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/managedVirtualNetworks/default')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/default/AzureBlobStorageTestMPE1')]",
+			"type": "Microsoft.Synapse/workspaces/managedVirtualNetworks/managedPrivateEndpoints",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"privateLinkResourceId": "/subscriptions/cf3cf956-64a6-4499-b7dc-136e9d68f7c9/resourceGroups/SynapseRG/providers/Microsoft.Storage/storageAccounts/synapseworkspaceblob",
+				"groupId": "blob",
+				"fqdns": [
+					"synapseworkspaceblob.blob.core.windows.net"
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/managedVirtualNetworks/default')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/default/synapse-ws-custstgacct--shawntestmpeworkspace-synapseworkspaceblob')]",
+			"type": "Microsoft.Synapse/workspaces/managedVirtualNetworks/managedPrivateEndpoints",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"privateLinkResourceId": "/subscriptions/cf3cf956-64a6-4499-b7dc-136e9d68f7c9/resourceGroups/SynapseRG/providers/Microsoft.Storage/storageAccounts/synapseworkspaceblob",
+				"groupId": "dfs",
+				"fqdns": [
+					"synapseworkspaceblob.dfs.core.windows.net"
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/managedVirtualNetworks/default')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/default/synapse-ws-sql--shawntestmpeworkspace')]",
+			"type": "Microsoft.Synapse/workspaces/managedVirtualNetworks/managedPrivateEndpoints",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"privateLinkResourceId": "/subscriptions/cf3cf956-64a6-4499-b7dc-136e9d68f7c9/resourceGroups/SynapseRG/providers/Microsoft.Synapse/workspaces/shawntestmpeworkspace",
+				"groupId": "sql",
+				"fqdns": [
+					"shawntestmpeworkspace.064fab6d-81ad-4cae-a2b4-4fc02c3e3c3a.sql.azuresynapse.net"
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/managedVirtualNetworks/default')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/default/synapse-ws-sqlOnDemand--shawntestmpeworkspace')]",
+			"type": "Microsoft.Synapse/workspaces/managedVirtualNetworks/managedPrivateEndpoints",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"privateLinkResourceId": "/subscriptions/cf3cf956-64a6-4499-b7dc-136e9d68f7c9/resourceGroups/SynapseRG/providers/Microsoft.Synapse/workspaces/shawntestmpeworkspace",
+				"groupId": "sqlOnDemand",
+				"fqdns": [
+					"shawntestmpeworkspace-ondemand.064fab6d-81ad-4cae-a2b4-4fc02c3e3c3a.sql.azuresynapse.net"
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/managedVirtualNetworks/default')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/sparkConfiguration1')]",
+			"type": "Microsoft.Synapse/workspaces/sparkConfigurations",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"configs": {
+					"43534": "4534"
+				},
+				"created": "2024-07-30T13:51:56.1090000+08:00",
+				"createdBy": "junbwang@microsoft.com",
+				"annotations": [],
+				"configMergeRule": {
+					"artifact.currentOperation.43534": "replace"
+				}
+			},
+			"dependsOn": []
+		}
+	]
+}

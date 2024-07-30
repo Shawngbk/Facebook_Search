@@ -1,0 +1,14 @@
+{
+	"name": "sparkConfiguration1",
+	"properties": {
+		"configs": {
+			"43534": "4534"
+		},
+		"created": "2024-07-30T13:51:56.1090000+08:00",
+		"createdBy": "junbwang@microsoft.com",
+		"annotations": [],
+		"configMergeRule": {
+			"artifact.currentOperation.43534": "replace"
+		}
+	}
+}
